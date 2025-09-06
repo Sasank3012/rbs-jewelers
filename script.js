@@ -440,13 +440,25 @@ function updateSaleItemDetails() {
     const item = inventory.find(i => i.id === itemId);
     
     if (item) {
+        // Set weight from inventory
         document.getElementById('saleWeight').value = item.weight;
-        document.getElementById('saleCostPrice').value = item.costPrice || item.price || 0;
-        document.getElementById('saleSellingPrice').value = item.sellingPrice || item.price || 0;
+        
+        // Set cost price from inventory (this is the key fix)
+        const costPrice = item.costPrice || item.price || 0;
+        document.getElementById('saleCostPrice').value = costPrice;
+        
+        // Clear selling price so user must enter it
+        document.getElementById('saleSellingPrice').value = '';
+        
+        // Set max units available from inventory
         document.getElementById('saleUnits').max = item.units;
         document.getElementById('saleUnits').value = Math.min(1, item.units);
-        calculateMargin();
+        
+        // Clear margin fields until selling price is entered
+        document.getElementById('saleMargin').value = '';
+        document.getElementById('saleMarginPercent').value = '';
     } else {
+        // Clear all fields if no item selected
         document.getElementById('saleWeight').value = '';
         document.getElementById('saleCostPrice').value = '';
         document.getElementById('saleSellingPrice').value = '';
@@ -462,10 +474,13 @@ function calculateMargin() {
     const sellingPrice = parseFloat(document.getElementById('saleSellingPrice').value) || 0;
     const units = parseInt(document.getElementById('saleUnits').value) || 1;
     
-    const margin = sellingPrice - costPrice;
-    const marginPercent = sellingPrice > 0 ? (margin / sellingPrice) * 100 : 0;
+    // Calculate margin per unit
+    const marginPerUnit = sellingPrice - costPrice;
+    const totalMargin = marginPerUnit * units;
+    const marginPercent = sellingPrice > 0 ? (marginPerUnit / sellingPrice) * 100 : 0;
     
-    document.getElementById('saleMargin').value = margin.toFixed(2);
+    // Update margin fields
+    document.getElementById('saleMargin').value = totalMargin.toFixed(2);
     document.getElementById('saleMarginPercent').value = marginPercent.toFixed(1);
 }
 

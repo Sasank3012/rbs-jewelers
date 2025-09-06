@@ -343,7 +343,15 @@
                 </div>
                 <div class="form-group">
                     <label for="saleSellingPrice">Selling Price ($):</label>
-                    <input type="number" id="saleSellingPrice" step="0.01" required placeholder="0.00">
+                    <input type="number" id="saleSellingPrice" step="0.01" required placeholder="0.00" oninput="calculateMargin()">
+                </div>
+                <div class="form-group">
+                    <label for="saleMargin">Profit Margin ($):</label>
+                    <input type="number" id="saleMargin" step="0.01" readonly placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="saleMarginPercent">Profit Margin (%):</label>
+                    <input type="number" id="saleMarginPercent" step="0.1" readonly placeholder="0.0">
                 </div>
                 <div class="form-group">
                     <label for="saleDate">Sale Date:</label>
