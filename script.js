@@ -609,7 +609,7 @@ function displaySales(providedFilteredSales = null) {
         }
         salesTableBody.innerHTML = `
             <tr>
-                <td colspan="7" class="empty-state">
+                <td colspan="11" class="empty-state">
                     <i class="fas fa-shopping-cart"></i>
                     <h3>No records found</h3>
                     <p>${hasFilters ? 'No records match the selected filters.' : 'Record your first sale to get started!'}</p>
@@ -659,8 +659,7 @@ function displaySales(providedFilteredSales = null) {
                     <td>$${(sale.costPrice || sale.unitPrice || 0).toFixed(2)}</td>
                     <td>$${(sale.sellingPrice || sale.unitPrice || 0).toFixed(2)}</td>
                     <td><strong>$${(sale.totalRevenue || sale.totalAmount || 0).toFixed(2)}</strong></td>
-                    <td>$${(sale.grossMargin || 0).toFixed(2)}</td>
-                    <td>${(sale.marginPercent || 0).toFixed(1)}%</td>
+                    <td>$${(sale.grossMargin || 0).toFixed(2)} (${(sale.marginPercent || 0).toFixed(1)}%)</td>
                     <td><span class="payment-method">${formatPaymentMethod(sale.paymentMethod || 'cash')}</span></td>
                     <td>
                         <button class="btn btn-secondary btn-sm" onclick="editSale(${sale.id})" title="Edit Sale">
@@ -678,13 +677,11 @@ function displaySales(providedFilteredSales = null) {
         if (daySales.length > 1) {
             html += `
                 <tr class="daily-total-row">
-                    <td colspan="4"><strong>Daily Total - ${formatDate(date)}</strong></td>
-                    <td><strong>${dayUnits}</strong></td>
+                    <td colspan="5"><strong>Daily Total - ${formatDate(date)}</strong></td>
                     <td></td>
                     <td></td>
                     <td><strong>$${dayRevenue.toFixed(2)}</strong></td>
                     <td><strong>$${dayMargin.toFixed(2)}</strong></td>
-                    <td><strong>${dayRevenue > 0 ? ((dayMargin / dayRevenue) * 100).toFixed(1) : 0}%</strong></td>
                     <td></td>
                     <td></td>
                 </tr>
@@ -696,13 +693,11 @@ function displaySales(providedFilteredSales = null) {
     if (filteredSales.length > 0) {
         html += `
             <tr class="total-row">
-                <td colspan="4"><strong>GRAND TOTAL</strong></td>
-                <td><strong>${totalUnits}</strong></td>
+                <td colspan="5"><strong>GRAND TOTAL</strong></td>
                 <td></td>
                 <td></td>
                 <td><strong>$${totalRevenue.toFixed(2)}</strong></td>
                 <td><strong>$${totalMargin.toFixed(2)}</strong></td>
-                <td><strong>${totalRevenue > 0 ? ((totalMargin / totalRevenue) * 100).toFixed(1) : 0}%</strong></td>
                 <td></td>
                 <td></td>
             </tr>
