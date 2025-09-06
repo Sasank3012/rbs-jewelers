@@ -182,6 +182,7 @@ function displayInventory(providedFilteredInventory = null) {
     if (!filteredInventory) {
         const selectedCategories = getSelectedValues('inventoryCategoryFilter');
         const selectedCostRanges = getSelectedValues('inventoryCostPriceFilter');
+        const selectedStockLevels = getSelectedValues('inventoryStockFilter');
         const dateStart = document.getElementById('inventoryDateStartFilter')?.value;
         const dateEnd = document.getElementById('inventoryDateEndFilter')?.value;
         filteredInventory = [...inventory];
@@ -218,13 +219,31 @@ function displayInventory(providedFilteredInventory = null) {
                 });
             });
         }
+        
+        // Stock level filter
+        if (selectedStockLevels.length > 0) {
+            filteredInventory = filteredInventory.filter(item => {
+                const units = item.units || 0;
+                return selectedStockLevels.some(level => {
+                    switch(level) {
+                        case 'low': return units <= 3;
+                        case 'medium': return units >= 4 && units <= 10;
+                        case 'high': return units > 10;
+                        default: return true;
+                    }
+                });
+            });
+        }
     }
     if (filteredInventory.length === 0) {
         let hasFilters = false;
         try {
             const selectedCategories = getSelectedValues('inventoryCategoryFilter');
             const selectedCostRanges = getSelectedValues('inventoryCostPriceFilter');
-            hasFilters = selectedCategories.length > 0 || selectedCostRanges.length > 0;
+            const selectedStockLevels = getSelectedValues('inventoryStockFilter');
+            const dateStart = document.getElementById('inventoryDateStartFilter')?.value;
+            const dateEnd = document.getElementById('inventoryDateEndFilter')?.value;
+            hasFilters = selectedCategories.length > 0 || selectedCostRanges.length > 0 || selectedStockLevels.length > 0 || dateStart || dateEnd;
         } catch (e) {
             hasFilters = false;
         }
@@ -695,17 +714,29 @@ function displaySales(providedFilteredSales = null) {
 
 
 function clearInventoryFilters() {
+    // Clear date filters
+    const dateStart = document.getElementById('inventoryDateStartFilter');
+    const dateEnd = document.getElementById('inventoryDateEndFilter');
+    if (dateStart) dateStart.value = '';
+    if (dateEnd) dateEnd.value = '';
+    
     // Clear all checkboxes in inventory custom dropdowns
     document.querySelectorAll('#inventoryCategoryFilter input[type="checkbox"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('#inventoryCostPriceFilter input[type="checkbox"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('#inventoryStockFilter input[type="checkbox"]').forEach(cb => cb.checked = false);
     updateDropdownText('inventoryCategoryFilter');
     updateDropdownText('inventoryCostPriceFilter');
+    updateDropdownText('inventoryStockFilter');
     displayInventory();
 }
 
 function clearSalesFilters() {
-    // Clear date filter
-    document.getElementById('salesDateFilter').value = '';
+    // Clear date filters
+    const dateStart = document.getElementById('salesDateStartFilter');
+    const dateEnd = document.getElementById('salesDateEndFilter');
+    if (dateStart) dateStart.value = '';
+    if (dateEnd) dateEnd.value = '';
+    
     // Clear all checkboxes in sales custom dropdowns
     document.querySelectorAll('#salesCategoryFilter input[type="checkbox"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('#salesPaymentFilter input[type="checkbox"]').forEach(cb => cb.checked = false);
@@ -716,7 +747,11 @@ function clearSalesFilters() {
 
 function clearHomeFilters() {
     // Clear all home page filters
-    document.getElementById('homeDateFilter').value = '';
+    const dateStart = document.getElementById('homeDateStartFilter');
+    const dateEnd = document.getElementById('homeDateEndFilter');
+    if (dateStart) dateStart.value = '';
+    if (dateEnd) dateEnd.value = '';
+    
     document.querySelectorAll('#homeCategoryFilter input[type="checkbox"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('#homePaymentFilter input[type="checkbox"]').forEach(cb => cb.checked = false);
     updateDropdownText('homeCategoryFilter');
@@ -957,6 +992,7 @@ function updateAllDropdownTexts() {
     updateDropdownText('homePaymentFilter');
     updateDropdownText('inventoryCategoryFilter');
     updateDropdownText('inventoryCostPriceFilter');
+    updateDropdownText('inventoryStockFilter');
     updateDropdownText('salesCategoryFilter');
     updateDropdownText('salesPaymentFilter');
 }
