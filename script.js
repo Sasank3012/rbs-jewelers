@@ -1017,12 +1017,77 @@ document.addEventListener('click', function(event) {
 });
 
 // Statistics
+// Function to calculate historical inventory at a specific date
+function getHistoricalInventory(targetDate) {
+    const historicalInventory = [];
+    
+    // Get all items that were purchased before or on the target date
+    const itemsPurchasedByDate = inventory.filter(item => {
+        const purchaseDate = item.datePurchased || item.dateAdded;
+        return purchaseDate && purchaseDate <= targetDate;
+    });
+    
+    // For each item, calculate how many units were available on the target date
+    itemsPurchasedByDate.forEach(item => {
+        // Get all sales of this item that happened on or before the target date
+        const salesByDate = sales.filter(sale => 
+            sale.itemId === item.id && 
+            sale.saleDate && 
+            sale.saleDate <= targetDate
+        );
+        
+        // Get all sales of this item that happened after the target date
+        const salesAfterDate = sales.filter(sale => 
+            sale.itemId === item.id && 
+            sale.saleDate && 
+            sale.saleDate > targetDate
+        );
+        
+        // Calculate total units sold after the target date
+        const unitsSoldAfterDate = salesAfterDate.reduce((sum, sale) => sum + sale.unitsSold, 0);
+        
+        // Calculate units that were available on the target date
+        // Current units + units sold after target date = units available on target date
+        const unitsOnTargetDate = item.units + unitsSoldAfterDate;
+        
+        // Only include items that had units available on the target date
+        if (unitsOnTargetDate > 0) {
+            historicalInventory.push({
+                ...item,
+                units: unitsOnTargetDate
+            });
+        }
+    });
+    
+    return historicalInventory;
+}
+
 function updateHomeStats() {
     const selectedCategories = getSelectedValues('homeCategoryFilter');
     const selectedPaymentMethods = getSelectedValues('homePaymentFilter');
     const dateStart = document.getElementById('homeDateStartFilter')?.value;
     const dateEnd = document.getElementById('homeDateEndFilter')?.value;
+    
+    // Determine the target date for historical calculation
+    // This will show inventory status as it was on this date
+    let targetDate = null;
+    if (dateEnd) {
+        targetDate = dateEnd; // Use end date if provided
+    } else if (dateStart) {
+        targetDate = dateStart; // Use start date if no end date
+    }
+    
     let filteredSales = [...sales];
+    let filteredInventory = [...inventory];
+    
+    // If we have a target date, calculate historical inventory
+    if (targetDate) {
+        console.log('Calculating historical inventory for date:', targetDate);
+        filteredInventory = getHistoricalInventory(targetDate);
+        console.log('Historical inventory result:', filteredInventory);
+    }
+    
+    // Apply date filter to sales
     if (dateStart || dateEnd) {
         filteredSales = filteredSales.filter(sale => {
             const saleDate = sale.saleDate;
@@ -1032,14 +1097,18 @@ function updateHomeStats() {
             return true;
         });
     }
+    
+    // Apply category filter to sales
     if (selectedCategories.length > 0) {
         filteredSales = filteredSales.filter(sale => selectedCategories.includes(sale.itemType));
     }
+    
+    // Apply payment method filter to sales
     if (selectedPaymentMethods.length > 0) {
         filteredSales = filteredSales.filter(sale => selectedPaymentMethods.includes(sale.paymentMethod));
     }
-    // Calculate stats from filtered data
-    let filteredInventory = [...inventory];
+    
+    // Apply category filter to inventory
     if (selectedCategories.length > 0) {
         filteredInventory = filteredInventory.filter(item => selectedCategories.includes(item.type));
     }
