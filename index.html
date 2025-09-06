@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBS Jewelers | Premium Jewelry Store</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <nav class="navbar" role="navigation" aria-label="Main Navigation">
+        <div class="nav-container">
+            <div class="nav-logo" aria-label="RBS Jewelers Logo">
+                <i class="fas fa-gem" aria-hidden="true"></i>
+                <span>RBS Jewelers</span>
+                <div class="auto-save-indicator" aria-live="polite">
+                    <i class="fas fa-save" aria-hidden="true"></i>
+                    <span>Auto-Save</span>
+                </div>
+            </div>
+            <ul class="nav-menu" role="menubar">
+                <li class="nav-item" role="none">
+                    <a href="#" class="nav-link active" data-page="home" role="menuitem" aria-current="page">
+                        <i class="fas fa-home" aria-hidden="true"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#" class="nav-link" data-page="inventory" role="menuitem">
+                        <i class="fas fa-boxes" aria-hidden="true"></i> Inventory
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#" class="nav-link" data-page="sales" role="menuitem">
+                        <i class="fas fa-shopping-cart" aria-hidden="true"></i> Sales
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content" role="main">
+        <!-- Home Page -->
+        <section id="home" class="page active" aria-labelledby="home-title">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 id="home-title">Welcome to RBS Jewelers</h1>
+                    <p>Your premier destination for exquisite jewelry in the mall</p>
+                    
+                    <div class="home-filters">
+                        <h2>Quick Filters</h2>
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label for="homeDateStartFilter">Date From:</label>
+                                <input type="date" id="homeDateStartFilter" onchange="updateHomeStats()">
+                            </div>
+                            <div class="filter-group">
+                                <label for="homeDateEndFilter">Date To:</label>
+                                <input type="date" id="homeDateEndFilter" onchange="updateHomeStats()">
+                            </div>
+                            <div class="filter-group">
+                                <label for="homeCategoryFilter">Category:</label>
+                                <div class="custom-dropdown" id="homeCategoryFilter">
+                                    <div class="dropdown-selected" onclick="toggleDropdown('homeCategoryFilter')">
+                                        <span class="selected-text">All Categories</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="dropdown-options">
+                                        <label><input type="checkbox" value="necklace" onchange="updateDropdownText('homeCategoryFilter'); updateHomeStats()"> Necklaces</label>
+                                        <label><input type="checkbox" value="bracelet" onchange="updateDropdownText('homeCategoryFilter'); updateHomeStats()"> Bracelets</label>
+                                        <label><input type="checkbox" value="ring" onchange="updateDropdownText('homeCategoryFilter'); updateHomeStats()"> Rings</label>
+                                        <label><input type="checkbox" value="earring" onchange="updateDropdownText('homeCategoryFilter'); updateHomeStats()"> Earrings</label>
+                                        <label><input type="checkbox" value="other" onchange="updateDropdownText('homeCategoryFilter'); updateHomeStats()"> Other</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label for="homePaymentFilter">Payment Method:</label>
+                                <div class="custom-dropdown" id="homePaymentFilter">
+                                    <div class="dropdown-selected" onclick="toggleDropdown('homePaymentFilter')">
+                                        <span class="selected-text">All Payment Methods</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="dropdown-options">
+                                        <label><input type="checkbox" value="cash" onchange="updateDropdownText('homePaymentFilter'); updateHomeStats()"> Cash</label>
+                                        <label><input type="checkbox" value="credit_card" onchange="updateDropdownText('homePaymentFilter'); updateHomeStats()"> Credit Card</label>
+                                        <label><input type="checkbox" value="loan_app" onchange="updateDropdownText('homePaymentFilter'); updateHomeStats()"> Loan/App</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" onclick="clearHomeFilters()">Clear Filters</button>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-stats">
+                        <div class="stat-card clickable-stat" onclick="showPage('inventory')">
+                            <i class="fas fa-gem"></i>
+                            <h3>Items in Stock</h3>
+                            <div class="stat-number" id="total-items">0</div>
+                        </div>
+                        <div class="stat-card clickable-stat" onclick="showPage('sales')">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>Items Sold</h3>
+                            <div class="stat-number" id="total-sales">0</div>
+                        </div>
+                        <div class="stat-card clickable-stat" onclick="showPage('sales')">
+                            <i class="fas fa-dollar-sign"></i>
+                            <h3>Total Revenue</h3>
+                            <div class="stat-number" id="total-revenue">$0.00</div>
+                        </div>
+                        <div class="stat-card clickable-stat" onclick="showPage('sales')">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Total Profit</h3>
+                            <div class="stat-number" id="total-profit">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory Page -->
+        <section id="inventory" class="page" aria-labelledby="inventory-title">
+            <div class="page-header">
+                <h1 id="inventory-title">Inventory Management</h1>
+                <button class="btn btn-primary" onclick="showAddItemModal()">
+                    <i class="fas fa-plus"></i> Add New Item
+                </button>
+            </div>
+            
+            <div class="quick-filters">
+                <h2>Quick Filters</h2>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="inventoryDateStartFilter">Date From:</label>
+                        <input type="date" id="inventoryDateStartFilter" onchange="displayInventory()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="inventoryDateEndFilter">Date To:</label>
+                        <input type="date" id="inventoryDateEndFilter" onchange="displayInventory()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="inventoryCategoryFilter">Category:</label>
+                        <div class="custom-dropdown" id="inventoryCategoryFilter">
+                            <div class="dropdown-selected" onclick="toggleDropdown('inventoryCategoryFilter')">
+                                <span class="selected-text">All Categories</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="dropdown-options">
+                                <label><input type="checkbox" value="necklace" onchange="updateDropdownText('inventoryCategoryFilter'); displayInventory()"> Necklaces</label>
+                                <label><input type="checkbox" value="bracelet" onchange="updateDropdownText('inventoryCategoryFilter'); displayInventory()"> Bracelets</label>
+                                <label><input type="checkbox" value="ring" onchange="updateDropdownText('inventoryCategoryFilter'); displayInventory()"> Rings</label>
+                                <label><input type="checkbox" value="earring" onchange="updateDropdownText('inventoryCategoryFilter'); displayInventory()"> Earrings</label>
+                                <label><input type="checkbox" value="other" onchange="updateDropdownText('inventoryCategoryFilter'); displayInventory()"> Other</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label for="inventoryCostPriceFilter">Cost Price Range:</label>
+                        <div class="custom-dropdown" id="inventoryCostPriceFilter">
+                            <div class="dropdown-selected" onclick="toggleDropdown('inventoryCostPriceFilter')">
+                                <span class="selected-text">All Price Ranges</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="dropdown-options">
+                                <label><input type="checkbox" value="0-50" onchange="updateDropdownText('inventoryCostPriceFilter'); displayInventory()"> $0 - $50</label>
+                                <label><input type="checkbox" value="50-100" onchange="updateDropdownText('inventoryCostPriceFilter'); displayInventory()"> $50 - $100</label>
+                                <label><input type="checkbox" value="100-200" onchange="updateDropdownText('inventoryCostPriceFilter'); displayInventory()"> $100 - $200</label>
+                                <label><input type="checkbox" value="200-500" onchange="updateDropdownText('inventoryCostPriceFilter'); displayInventory()"> $200 - $500</label>
+                                <label><input type="checkbox" value="500+" onchange="updateDropdownText('inventoryCostPriceFilter'); displayInventory()"> $500+</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="clearInventoryFilters()">Clear Filters</button>
+                </div>
+            </div>
+            
+            <div class="inventory-grid" id="inventoryGrid">
+                <!-- Inventory items will be displayed here -->
+            </div>
+        </section>
+
+        <!-- Sales Page -->
+        <section id="sales" class="page" aria-labelledby="sales-title">
+            <div class="page-header">
+                <h1 id="sales-title">Sales Management</h1>
+                <button class="btn btn-primary" onclick="showRecordSaleModal()">
+                    <i class="fas fa-plus"></i> Record Sale
+                </button>
+            </div>
+            
+            <div class="quick-filters">
+                <h2>Quick Filters</h2>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="salesDateStartFilter">Date From:</label>
+                        <input type="date" id="salesDateStartFilter" onchange="displaySales()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="salesDateEndFilter">Date To:</label>
+                        <input type="date" id="salesDateEndFilter" onchange="displaySales()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="salesCategoryFilter">Category:</label>
+                        <div class="custom-dropdown" id="salesCategoryFilter">
+                            <div class="dropdown-selected" onclick="toggleDropdown('salesCategoryFilter')">
+                                <span class="selected-text">All Categories</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="dropdown-options">
+                                <label><input type="checkbox" value="necklace" onchange="updateDropdownText('salesCategoryFilter'); displaySales()"> Necklaces</label>
+                                <label><input type="checkbox" value="bracelet" onchange="updateDropdownText('salesCategoryFilter'); displaySales()"> Bracelets</label>
+                                <label><input type="checkbox" value="ring" onchange="updateDropdownText('salesCategoryFilter'); displaySales()"> Rings</label>
+                                <label><input type="checkbox" value="earring" onchange="updateDropdownText('salesCategoryFilter'); displaySales()"> Earrings</label>
+                                <label><input type="checkbox" value="other" onchange="updateDropdownText('salesCategoryFilter'); displaySales()"> Other</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label for="salesPaymentFilter">Payment Method:</label>
+                        <div class="custom-dropdown" id="salesPaymentFilter">
+                            <div class="dropdown-selected" onclick="toggleDropdown('salesPaymentFilter')">
+                                <span class="selected-text">All Payment Methods</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="dropdown-options">
+                                <label><input type="checkbox" value="cash" onchange="updateDropdownText('salesPaymentFilter'); displaySales()"> Cash</label>
+                                <label><input type="checkbox" value="credit_card" onchange="updateDropdownText('salesPaymentFilter'); displaySales()"> Credit Card</label>
+                                <label><input type="checkbox" value="loan_app" onchange="updateDropdownText('salesPaymentFilter'); displaySales()"> Loan/App</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="clearSalesFilters()">Clear Filters</button>
+                </div>
+            </div>
+            
+            <div class="sales-table-container">
+                <table class="sales-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Type</th>
+                            <th>Weight</th>
+                            <th>Units Sold</th>
+                            <th>Cost Price</th>
+                            <th>Selling Price</th>
+                            <th>Total Amount</th>
+                            <th>Profit</th>
+                            <th>Payment Method</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                        <!-- Sales records will be displayed here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Item Modal -->
+    <div id="addItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Item</h2>
+                <button class="close-btn" onclick="closeModal('addItemModal')">&times;</button>
+            </div>
+            <form id="addItemForm" onsubmit="addItem(event)" autocomplete="off">
+                <div class="form-group">
+                    <label for="itemType">Item Type:</label>
+                    <select id="itemType" required>
+                        <option value="">Select Type</option>
+                        <option value="necklace">Necklace</option>
+                        <option value="bracelet">Bracelet</option>
+                        <option value="ring">Ring</option>
+                        <option value="earring">Earring</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="itemModel">Model/Description:</label>
+                    <input type="text" id="itemModel" required placeholder="e.g., Diamond Pendant, Gold Chain">
+                </div>
+                <div class="form-group">
+                    <label for="itemWeight">Weight (grams):</label>
+                    <input type="number" id="itemWeight" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="itemUnits">Units in Stock:</label>
+                    <input type="number" id="itemUnits" min="1" required placeholder="1">
+                </div>
+                <div class="form-group">
+                    <label for="itemCostPrice">Cost Price ($):</label>
+                    <input type="number" id="itemCostPrice" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="itemDatePurchased">Date Purchased:</label>
+                    <input type="date" id="itemDatePurchased" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addItemModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Record Sale Modal -->
+    <div id="recordSaleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Record Sale</h2>
+                <button class="close-btn" onclick="closeModal('recordSaleModal')">&times;</button>
+            </div>
+            <form id="recordSaleForm" onsubmit="addSale(event)" autocomplete="off">
+                <div class="form-group">
+                    <label for="saleItemType">Item Type:</label>
+                    <select id="saleItemType" onchange="updateSaleItemOptions()" required>
+                        <option value="">Select Type</option>
+                        <option value="necklace">Necklace</option>
+                        <option value="bracelet">Bracelet</option>
+                        <option value="ring">Ring</option>
+                        <option value="earring">Earring</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="saleItemModel">Item Model:</label>
+                    <select id="saleItemModel" onchange="updateSaleItemDetails()" required>
+                        <option value="">Select Model</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="saleWeight">Weight (grams):</label>
+                    <input type="number" id="saleWeight" step="0.01" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="saleUnits">Units to Sell:</label>
+                    <input type="number" id="saleUnits" min="1" required placeholder="1">
+                </div>
+                <div class="form-group">
+                    <label for="saleCostPrice">Cost Price ($):</label>
+                    <input type="number" id="saleCostPrice" step="0.01" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="saleSellingPrice">Selling Price ($):</label>
+                    <input type="number" id="saleSellingPrice" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="saleDate">Sale Date:</label>
+                    <input type="date" id="saleDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Method:</label>
+                    <select id="paymentMethod" required>
+                        <option value="cash">Cash</option>
+                        <option value="credit_card">Credit Card</option>
+                        <option value="loan_app">Loan/App</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('recordSaleModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Record Sale</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
